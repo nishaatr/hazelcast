@@ -36,11 +36,9 @@ import static java.util.concurrent.TimeUnit.NANOSECONDS;
 class NioEventloop extends Eventloop {
 
     final Selector selector = SelectorOptimizer.newSelector();
-    private final NioReactor reactor;
 
-    NioEventloop(NioReactor reactor, NioReactorBuilder builder) {
-        super(reactor, builder);
-        this.reactor = reactor;
+    NioEventloop(NioReactor nioReactor, NioReactorBuilder builder) {
+        super(nioReactor, builder);
     }
 
     @Override

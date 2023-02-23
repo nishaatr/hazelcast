@@ -254,6 +254,7 @@ public abstract class AsyncSocket_RpcTest {
                 .set(SO_SNDBUF, SOCKET_BUFFER_SIZE)
                 .set(SO_RCVBUF, SOCKET_BUFFER_SIZE)
                 .setReadHandler(new ClientReadHandler())
+                .setSSLEngineFactory(new DefaultSSLEngineFactory())
                 .build();
 
         clientSocket.start();
@@ -270,6 +271,7 @@ public abstract class AsyncSocket_RpcTest {
                             .set(SO_SNDBUF, SOCKET_BUFFER_SIZE)
                             .set(SO_RCVBUF, SOCKET_BUFFER_SIZE)
                             .setReadHandler(new ServerReadHandler())
+                            .setSSLEngineFactory(new DefaultSSLEngineFactory())
                             .build();
                     socket.start();
                 })

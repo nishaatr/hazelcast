@@ -23,6 +23,8 @@ import com.hazelcast.internal.tpc.iobuffer.IOBuffer;
 import com.hazelcast.internal.tpc.util.CircularQueue;
 import org.jctools.queues.MpmcArrayQueue;
 
+import javax.net.ssl.SSLEngine;
+import javax.net.ssl.SSLEngineResult;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -54,7 +56,7 @@ public final class NioAsyncSocket extends AsyncSocket {
     private final NioAsyncSocketOptions options;
     private final AtomicReference<Thread> flushThread = new AtomicReference<>();
     private final MpmcArrayQueue<IOBuffer> unflushedBufs;
-    private final Handler handler;
+    private final PlainHandler handler;
     private final SocketChannel socketChannel;
     private final NioReactor reactor;
     private final Thread eventloopThread;
@@ -89,7 +91,7 @@ public final class NioAsyncSocket extends AsyncSocket {
             this.writeThrough = builder.writeThrough;
             this.regularSchedule = builder.regularSchedule;
             this.unflushedBufs = new MpmcArrayQueue<>(builder.unflushedBufsCapacity);
-            this.handler = new Handler(builder);
+            this.handler = new PlainHandler(builder);
             this.key = socketChannel.register(reactor.selector, 0, handler);
             this.readHandler = builder.readHandler;
             readHandler.init(this);
@@ -334,10 +336,10 @@ public final class NioAsyncSocket extends AsyncSocket {
         super.close0();
     }
 
-    private final class Handler implements NioHandler, Runnable {
-        private final ByteBuffer receiveBuffer;
+    private class PlainHandler implements NioHandler, Runnable {
+        final ByteBuffer receiveBuffer;
 
-        private Handler(NioAsyncSocketBuilder builder) throws SocketException {
+        private PlainHandler(NioAsyncSocketBuilder builder) throws SocketException {
             int receiveBufferSize = builder.socketChannel.socket().getReceiveBufferSize();
             this.receiveBuffer = builder.receiveBufferIsDirect
                     ? ByteBuffer.allocateDirect(receiveBufferSize)
@@ -386,7 +388,7 @@ public final class NioAsyncSocket extends AsyncSocket {
             }
         }
 
-        private void handleRead() throws IOException {
+        public void handleRead() throws IOException {
             readEvents.inc();
 
             int read = socketChannel.read(receiveBuffer);
@@ -402,7 +404,7 @@ public final class NioAsyncSocket extends AsyncSocket {
             }
         }
 
-        private void handleWrite() throws IOException {
+        public void handleWrite() throws IOException {
             assert flushThread.get() != null;
 
             writeEvents.inc();

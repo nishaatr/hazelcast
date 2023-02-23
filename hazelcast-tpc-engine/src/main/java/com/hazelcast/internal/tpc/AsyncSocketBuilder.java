@@ -40,6 +40,8 @@ public interface AsyncSocketBuilder {
      */
     <T> AsyncSocketBuilder set(Option<T> option, T value);
 
+    AsyncSocketBuilder setSSLEngineFactory(SSLEngineFactory sslEngineFactory);
+
     /**
      * Sets the ReadHandler.
      *

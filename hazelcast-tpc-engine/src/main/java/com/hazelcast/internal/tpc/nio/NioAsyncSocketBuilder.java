@@ -20,6 +20,7 @@ import com.hazelcast.internal.tpc.AsyncSocket;
 import com.hazelcast.internal.tpc.AsyncSocketBuilder;
 import com.hazelcast.internal.tpc.Option;
 import com.hazelcast.internal.tpc.ReadHandler;
+import com.hazelcast.internal.tpc.SSLEngineFactory;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -46,6 +47,7 @@ public class NioAsyncSocketBuilder implements AsyncSocketBuilder {
     int unflushedBufsCapacity = DEFAULT_UNFLUSHED_BUFS_CAPACITY;
     ReadHandler readHandler;
     NioAsyncSocketOptions options;
+    SSLEngineFactory sslEngineFactory;
     private boolean build;
 
     NioAsyncSocketBuilder(NioReactor reactor, NioAcceptRequest acceptRequest) {
@@ -64,6 +66,14 @@ public class NioAsyncSocketBuilder implements AsyncSocketBuilder {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
+    }
+
+    @Override
+    public AsyncSocketBuilder setSSLEngineFactory(SSLEngineFactory sslEngineFactory) {
+        verifyNotBuild();
+
+        this.sslEngineFactory = checkNotNull(sslEngineFactory, "sslEngineFactory");
+        return this;
     }
 
     @Override
@@ -127,12 +137,17 @@ public class NioAsyncSocketBuilder implements AsyncSocketBuilder {
         }
 
         if (Thread.currentThread() == reactor.eventloopThread()) {
-            return new NioAsyncSocket(NioAsyncSocketBuilder.this);
+            return sslEngineFactory == null
+                    ? new NioAsyncSocket(this)
+                    : new TLSNioAsyncSocket(this);
         } else {
-            CompletableFuture<NioAsyncSocket> future = new CompletableFuture<>();
+            CompletableFuture<AsyncSocket> future = new CompletableFuture<>();
             reactor.execute(() -> {
                 try {
-                    NioAsyncSocket asyncSocket = new NioAsyncSocket(NioAsyncSocketBuilder.this);
+                    AsyncSocket asyncSocket = sslEngineFactory == null
+                            ? new NioAsyncSocket(NioAsyncSocketBuilder.this)
+                            : new TLSNioAsyncSocket(NioAsyncSocketBuilder.this);
+
                     future.complete(asyncSocket);
                 } catch (Throwable e) {
                     future.completeExceptionally(e);

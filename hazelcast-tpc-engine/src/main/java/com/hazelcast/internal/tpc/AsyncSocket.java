@@ -140,7 +140,7 @@ public abstract class AsyncSocket extends AbstractAsyncSocket {
         return localAddress;
     }
 
-   /**
+    /**
      * Configures if this AsyncSocket is readable or not. If there is no change in the
      * readable status, the call is ignored.
      * <p/>
@@ -256,6 +256,11 @@ public abstract class AsyncSocket extends AbstractAsyncSocket {
 
     @Override
     public final String toString() {
-        return getClass().getSimpleName() + "[" + localAddress + "->" + remoteAddress + "]";
+        if (clientSide) {
+            return getClass().getSimpleName() + "[" + localAddress + "->" + remoteAddress + "]";
+        } else {
+            return "               " + getClass().getSimpleName() + "[" + localAddress + "->" + remoteAddress + "]";
+        }
+
     }
 }
