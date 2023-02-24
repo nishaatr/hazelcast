@@ -23,8 +23,6 @@ import com.hazelcast.internal.tpc.iobuffer.IOBuffer;
 import com.hazelcast.internal.tpc.util.CircularQueue;
 import org.jctools.queues.MpmcArrayQueue;
 
-import javax.net.ssl.SSLEngine;
-import javax.net.ssl.SSLEngineResult;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -270,7 +268,7 @@ public final class NioAsyncSocket extends AsyncSocket {
         }
     }
 
-    private void resetFlushed() {
+    private void unschedule() {
         flushThread.set(null);
 
         if (!unflushedBufs.isEmpty()) {
@@ -341,7 +339,7 @@ public final class NioAsyncSocket extends AsyncSocket {
 
         private PlainHandler(NioAsyncSocketBuilder builder) throws SocketException {
             int receiveBufferSize = builder.socketChannel.socket().getReceiveBufferSize();
-            this.receiveBuffer = builder.receiveBufferIsDirect
+            this.receiveBuffer = builder.directBuffers
                     ? ByteBuffer.allocateDirect(receiveBufferSize)
                     : ByteBuffer.allocate(receiveBufferSize);
         }
@@ -425,7 +423,7 @@ public final class NioAsyncSocket extends AsyncSocket {
                     key.interestOps(interestOps & ~OP_WRITE);
                 }
 
-                resetFlushed();
+                unschedule();
             } else {
                 // We need to register for the OP_WRITE because not everything got written
                 key.interestOps(key.interestOps() | OP_WRITE);

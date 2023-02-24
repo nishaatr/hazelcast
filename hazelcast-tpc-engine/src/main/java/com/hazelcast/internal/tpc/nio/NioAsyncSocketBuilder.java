@@ -43,7 +43,7 @@ public class NioAsyncSocketBuilder implements AsyncSocketBuilder {
     final boolean clientSide;
     boolean regularSchedule = true;
     boolean writeThrough;
-    boolean receiveBufferIsDirect = true;
+    boolean directBuffers = true;
     int unflushedBufsCapacity = DEFAULT_UNFLUSHED_BUFS_CAPACITY;
     ReadHandler readHandler;
     NioAsyncSocketOptions options;
@@ -84,10 +84,10 @@ public class NioAsyncSocketBuilder implements AsyncSocketBuilder {
         return this;
     }
 
-    public NioAsyncSocketBuilder setReceiveBufferIsDirect(boolean receiveBufferIsDirect) {
+    public NioAsyncSocketBuilder setDirectBuffers(boolean directBuffers) {
         verifyNotBuild();
 
-        this.receiveBufferIsDirect = receiveBufferIsDirect;
+        this.directBuffers = directBuffers;
         return this;
     }
 
