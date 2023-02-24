@@ -139,14 +139,14 @@ public class NioAsyncSocketBuilder implements AsyncSocketBuilder {
         if (Thread.currentThread() == reactor.eventloopThread()) {
             return sslEngineFactory == null
                     ? new NioAsyncSocket(this)
-                    : new TLSNioAsyncSocket(this);
+                    : new NioTlsAsyncSocket(this);
         } else {
             CompletableFuture<AsyncSocket> future = new CompletableFuture<>();
             reactor.execute(() -> {
                 try {
                     AsyncSocket asyncSocket = sslEngineFactory == null
                             ? new NioAsyncSocket(NioAsyncSocketBuilder.this)
-                            : new TLSNioAsyncSocket(NioAsyncSocketBuilder.this);
+                            : new NioTlsAsyncSocket(NioAsyncSocketBuilder.this);
 
                     future.complete(asyncSocket);
                 } catch (Throwable e) {

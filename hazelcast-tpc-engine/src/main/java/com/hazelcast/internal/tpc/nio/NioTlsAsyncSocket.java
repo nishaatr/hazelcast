@@ -4,7 +4,6 @@ import com.hazelcast.internal.tpc.AsyncSocket;
 import com.hazelcast.internal.tpc.AsyncSocketOptions;
 import com.hazelcast.internal.tpc.ReadHandler;
 import com.hazelcast.internal.tpc.iobuffer.IOBuffer;
-import com.hazelcast.internal.tpc.util.BufferUtil;
 import com.hazelcast.internal.tpc.util.CircularQueue;
 import org.jctools.queues.MpmcArrayQueue;
 
@@ -26,7 +25,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static com.hazelcast.internal.tpc.util.BufferUtil.compactOrClear;
-import static com.hazelcast.internal.tpc.util.BufferUtil.upcast;
 import static com.hazelcast.internal.tpc.util.CloseUtil.closeQuietly;
 import static com.hazelcast.internal.tpc.util.ExceptionUtil.sneakyThrow;
 import static com.hazelcast.internal.tpc.util.Preconditions.checkNotNull;
@@ -41,7 +39,7 @@ import static javax.net.ssl.SSLEngineResult.HandshakeStatus.FINISHED;
  * <p>
  * https://github.com/alkarn/sslengine.example/blob/master/src/main/java/alkarn/github/io/sslengine/example/NioSslServer.java
  */
-public class TLSNioAsyncSocket extends AsyncSocket {
+public class NioTlsAsyncSocket extends AsyncSocket {
 
     private final NioAsyncSocketOptions options;
     private final AtomicReference<Thread> flushThread = new AtomicReference<>();
@@ -62,7 +60,7 @@ public class TLSNioAsyncSocket extends AsyncSocket {
     private boolean connect;
     private CompletableFuture<Void> connectFuture;
 
-    TLSNioAsyncSocket(NioAsyncSocketBuilder builder) {
+    NioTlsAsyncSocket(NioAsyncSocketBuilder builder) {
         super(builder.clientSide);
 
         assert Thread.currentThread() == builder.reactor.eventloopThread();
@@ -341,7 +339,7 @@ public class TLSNioAsyncSocket extends AsyncSocket {
             //todo: we need to pass the correct address.
             this.sslEngine = builder.sslEngineFactory.create(clientSide, null);
 
-            int bufSize = 1024 * 1024;
+            int bufSize = 64 * 1024;
 //            int receiveBufferSize = builder.socketChannel.socket().getReceiveBufferSize();
 //            if(receiveBufferSize<bufSize){
 //                receiveBufferSize = bufSize;
@@ -384,9 +382,9 @@ public class TLSNioAsyncSocket extends AsyncSocket {
             if (cause instanceof EOFException) {
                 // The stacktrace of an EOFException isn't important. It just means that the
                 // Exception is closed by the remote side.
-                TLSNioAsyncSocket.this.close(reason != null ? reason : cause.getMessage(), null);
+                NioTlsAsyncSocket.this.close(reason != null ? reason : cause.getMessage(), null);
             } else {
-                TLSNioAsyncSocket.this.close(reason, cause);
+                NioTlsAsyncSocket.this.close(reason, cause);
             }
         }
 
@@ -417,7 +415,7 @@ public class TLSNioAsyncSocket extends AsyncSocket {
 //            } catch (InterruptedException e) {
 //                throw new RuntimeException(e);
 //            }
-            System.out.println(TLSNioAsyncSocket.this + " handleRead");
+            //System.out.println(TLSNioAsyncSocket.this + " handleRead");
             readEvents.inc();
 
             if (!handshakeComplete && !handshake()) {
@@ -425,7 +423,7 @@ public class TLSNioAsyncSocket extends AsyncSocket {
             }
 
             int read = socketChannel.read(receiveBuffer);
-            System.out.println(TLSNioAsyncSocket.this + " bytes read: " + read);
+            //System.out.println(TLSNioAsyncSocket.this + " bytes read: " + read);
 
             if (read == -1) {
                 throw new EOFException("Remote socket closed!");
@@ -438,7 +436,7 @@ public class TLSNioAsyncSocket extends AsyncSocket {
             do {
                 SSLEngineResult unwrapResult = sslEngine.unwrap(receiveBuffer, appBuffer);
 
-                System.out.println(TLSNioAsyncSocket.this + " handleRead: unwrapResult " + unwrapResult.toString().replace("\n", " "));
+                //System.out.println(TLSNioAsyncSocket.this + " handleRead: unwrapResult " + unwrapResult.toString().replace("\n", " "));
 
                 switch (unwrapResult.getStatus()) {
                     case OK:
@@ -464,8 +462,8 @@ public class TLSNioAsyncSocket extends AsyncSocket {
                     case BUFFER_UNDERFLOW:
                         // not enough data available to decode, so wait for more data.
                         //compactOrClear(appBuffer);
-                        System.out.println(TLSNioAsyncSocket.this + " receiveBuffer " + BufferUtil.toDebugString(receiveBuffer));
-                        System.out.println(TLSNioAsyncSocket.this + " appBuffer " + BufferUtil.toDebugString(appBuffer));
+                        //System.out.println(TLSNioAsyncSocket.this + " receiveBuffer " + BufferUtil.toDebugString(receiveBuffer));
+                        //System.out.println(TLSNioAsyncSocket.this + " appBuffer " + BufferUtil.toDebugString(appBuffer));
                         unwrapMore = false;
                         break;
                     default:
@@ -483,7 +481,7 @@ public class TLSNioAsyncSocket extends AsyncSocket {
         private void handleWrite() throws IOException {
             assert flushThread.get() != null;
 
-            System.out.println(this + " handleWrite");
+            //System.out.println(this + " handleWrite");
             writeEvents.inc();
 
             if (!handshakeComplete && !handshake()) {
@@ -498,21 +496,21 @@ public class TLSNioAsyncSocket extends AsyncSocket {
             boolean bufferOverflow = false;
             while (current != null && !bufferOverflow) {
                 SSLEngineResult wrapResult = sslEngine.wrap(current.byteBuffer(), sendBuffer);
-                System.out.println(TLSNioAsyncSocket.this + " handleWrite: wrapResult " + wrapResult.toString().replace("\n", " "));
+                //System.out.println(TLSNioAsyncSocket.this + " handleWrite: wrapResult " + wrapResult.toString().replace("\n", " "));
                 switch (wrapResult.getStatus()) {
                     case OK:
-                        System.out.println(TLSNioAsyncSocket.this + " current:" + BufferUtil.toDebugString(current.byteBuffer()));
-                        System.out.println(TLSNioAsyncSocket.this + " sendBuffer:" + BufferUtil.toDebugString(sendBuffer));
+                        //System.out.println(TLSNioAsyncSocket.this + " current:" + BufferUtil.toDebugString(current.byteBuffer()));
+                        //System.out.println(TLSNioAsyncSocket.this + " sendBuffer:" + BufferUtil.toDebugString(sendBuffer));
                         if (!current.byteBuffer().hasRemaining()) {
                             current.release();
                             current = unflushedBufs.poll();
-                            if (current == null) {
-                                System.out.println(TLSNioAsyncSocket.this + " no more buffers found");
-                            } else {
-                                System.out.println(TLSNioAsyncSocket.this + " another buffer found");
-                            }
+//                            if (current == null) {
+//                                System.out.println(TLSNioAsyncSocket.this + " no more buffers found");
+//                            } else {
+//                                System.out.println(TLSNioAsyncSocket.this + " another buffer found");
+//                            }
                         } else {
-                            System.out.println(TLSNioAsyncSocket.this + " more wrapping on same buffer");
+                            //System.out.println(TLSNioAsyncSocket.this + " more wrapping on same buffer");
                         }
                         break;
                     case CLOSED:
@@ -536,9 +534,9 @@ public class TLSNioAsyncSocket extends AsyncSocket {
             bytesWritten.inc(written);
             compactOrClear(sendBuffer);
 
-            System.out.println(TLSNioAsyncSocket.this + " bytes written:" + written);
+            //System.out.println(TLSNioAsyncSocket.this + " bytes written:" + written);
 
-            System.out.println(TLSNioAsyncSocket.this + " current " + current + " bufferOverflow:" + bufferOverflow+" unflushedBufs.size:"+unflushedBufs.size());
+            //System.out.println(TLSNioAsyncSocket.this + " current " + current + " bufferOverflow:" + bufferOverflow+" unflushedBufs.size:"+unflushedBufs.size());
             if (current == null && !bufferOverflow) {
                 // everything got written
                 int interestOps = key.interestOps();
@@ -558,7 +556,7 @@ public class TLSNioAsyncSocket extends AsyncSocket {
         private boolean handshake() throws IOException {
             while (true) {
                 SSLEngineResult.HandshakeStatus handshakeStatus = sslEngine.getHandshakeStatus();
-                System.out.println(TLSNioAsyncSocket.this + " handshakeStatus " + handshakeStatus);
+                //System.out.println(NioTlsAsyncSocket.this + " handshakeStatus " + handshakeStatus);
 
                 switch (handshakeStatus) {
                     case NEED_TASK:
@@ -593,7 +591,7 @@ public class TLSNioAsyncSocket extends AsyncSocket {
                                 if (wrapResult.getHandshakeStatus() == FINISHED) {
                                     handshakeComplete = true;
                                     sslSession = sslEngine.getSession();
-                                    System.out.println(TLSNioAsyncSocket.this + " handshake complete!!");
+                                    //System.out.println(NioTlsAsyncSocket.this + " handshake complete!!");
                                     unschedule();
                                     return true;
                                 }
@@ -626,7 +624,7 @@ public class TLSNioAsyncSocket extends AsyncSocket {
                                 throw new RuntimeException("Closed");
                             case OK:
                                 if (unwrapResult.getHandshakeStatus() == FINISHED) {
-                                    System.out.println(TLSNioAsyncSocket.this + "handshake complete!!");
+                                    //System.out.println(NioTlsAsyncSocket.this + "handshake complete!!");
                                     handshakeComplete = true;
                                     sslSession = sslEngine.getSession();
                                     unschedule();
@@ -653,7 +651,7 @@ public class TLSNioAsyncSocket extends AsyncSocket {
                 remoteAddress = socketChannel.getRemoteAddress();
                 localAddress = socketChannel.getLocalAddress();
                 if (logger.isInfoEnabled()) {
-                    logger.info("Connection established " + TLSNioAsyncSocket.this);
+                    logger.info("Connection established " + NioTlsAsyncSocket.this);
                 }
 
                 key.interestOps(key.interestOps() | OP_READ);
