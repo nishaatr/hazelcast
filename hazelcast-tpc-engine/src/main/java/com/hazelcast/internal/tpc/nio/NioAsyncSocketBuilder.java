@@ -20,7 +20,7 @@ import com.hazelcast.internal.tpc.AsyncSocket;
 import com.hazelcast.internal.tpc.AsyncSocketBuilder;
 import com.hazelcast.internal.tpc.Option;
 import com.hazelcast.internal.tpc.ReadHandler;
-import com.hazelcast.internal.tpc.SSLEngineFactory;
+import com.hazelcast.nio.ssl.SSLEngineFactory;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
