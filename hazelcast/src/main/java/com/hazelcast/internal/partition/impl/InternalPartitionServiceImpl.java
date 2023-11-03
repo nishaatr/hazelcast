@@ -751,6 +751,7 @@ public class InternalPartitionServiceImpl implements InternalPartitionService,
      * @see MigrationManager#scheduleActiveMigrationFinalization(MigrationInfo)
      * @return whether or not the new partition table is accepted
      */
+    @SuppressWarnings({"checkstyle:npathcomplexity", "checkstyle:cyclomaticcomplexity"})
     private boolean updatePartitionsAndFinalizeMigrations(InternalPartition[] partitions,
             Collection<MigrationInfo> completedMigrations, Address sender) {
 
