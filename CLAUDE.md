@@ -12,10 +12,28 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Platform version compatibility (ibcluding supported JDKs) can be found in https://docs.hazelcast.com/hazelcast/5.6/deploy/versioning-compatibility
 
 ## PR Conventions
+- User must supply PR description based on template https://github.com/nishaatr/hazelcast/blob/master/.github/pull_request_template.md
 - Ensure PR author is adhering to https://github.com/nishaatr/hazelcast/blob/master/CONTRIBUTING.md
-- PRs must pass testing
-- PRs should 
+- PRs must pass account for testing
+  - Write/update tests alongside implementation code to validate changes.
+  - Do not skip or omit test code.
+  - Do not delete or weaken tests just to make them pass.
+- PRs should
+- sonar
 
+→ 
+
+
+
+## Key Modules
+- `hazelcast/` — core library
+- `hazelcast-spring/` — Spring integration
+- `extensions/` — optional connectors
+## Key Modules
+- `hazelcast/` — core library
+- `hazelcast-spring/` — Spring integration
+- `extensions/` — optional connectors
+  
 ## Build Commands
 
 ### Prerequisites
@@ -32,7 +50,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```
 
 ### Running Tests
-Some tests require Docker to run. Set -Dhazelcast.disable.docker.tests system property to ignore them.
+Some tests require Docker to run. Set `-Dhazelcast.disable.docker.tests` system property to ignore them.
 
 Build and run quick/integration tests
 
