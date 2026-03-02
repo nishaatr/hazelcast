@@ -1,6 +1,6 @@
 # agents.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides rules for AI coding agents e.g. Claude Code when working with code in this repository.
 
 ## Project Overview
 [Hazelcast](https://hazelcast.com/) is a unified real-time data platform that combines an in-memory data store with a stream processing engine. It is primarily designed to provide low-latency data access and high-speed processing for applications that need to act on data instantly. 
@@ -13,9 +13,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
   - release specific docs URL format `https://docs.hazelcast.org/docs/<release version here>/javadoc/`
 - Hazelcast Code Samples can be found in GitHub repository [hazelcast-code-samples](https://github.com/hazelcast/hazelcast-code-samples)
 - Platform version compatibility (including supported JDKs) can be found in [Supported versions](https://docs.hazelcast.com/hazelcast/5.6/deploy/versioning-compatibility)
-- Getting started guides
+- Other useful pages
   - [Get started with Community Edition](https://docs.hazelcast.com/hazelcast/latest/getting-started/get-started-docker)
   - [Install Hazelcast Community Edition](https://docs.hazelcast.com/hazelcast/latest/getting-started/install-hazelcast)
+  - [Best practices](https://docs.hazelcast.com/hazelcast/latest/cluster-performance/best-practices)
 
 ## PR Conventions
 - User must supply PR description based on template [pull_request_template.md](https://github.com/nishaatr/hazelcast/blob/master/.github/pull_request_template.md)
@@ -23,6 +24,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - PR title descriptions must speak to the end-user about the positive impact, not about internal implementation details
 - PR and git commits should be ideally in imperative Verb Form
 - PRs must reference GitHub issue with "Fixes #NNN" at the top of the PR body and labels are added accordingly (as in PR template)
+- Ensure changes do not introduce any `SNAPSHOT` dependencies
 - PRs must pass account for testing
   - Write/update tests alongside implementation code to validate changes
   - Do not skip or omit test code
