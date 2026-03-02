@@ -1,4 +1,4 @@
-# agents.md
+# AGENTS.md
 
 This file provides rules for AI coding agents e.g. Claude Code when working with code in this repository.
 
