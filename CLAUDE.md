@@ -19,14 +19,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## PR Conventions
 - User must supply PR description based on template [pull_request_template.md](https://github.com/nishaatr/hazelcast/blob/master/.github/pull_request_template.md)
-- Ensure PR author is adhering to https://github.com/nishaatr/hazelcast/blob/master/CONTRIBUTING.md
+- Ensure PR author is adhering to [CONTRIBUTING.md](https://github.com/nishaatr/hazelcast/blob/master/CONTRIBUTING.md)
 - PR title descriptions must speak to the end-user about the positive impact, not about internal implementation details
 - PR and git commits should be ideally in imperative Verb Form
 - PRs must reference GitHub issue with "Fixes #NNN" at the top of the PR body and labels are added accordingly (as in PR template)
 - PRs must pass account for testing
-  - Write/update tests alongside implementation code to validate changes.
-  - Do not skip or omit test code.
-  - Do not delete or weaken tests just to make them pass.
+  - Write/update tests alongside implementation code to validate changes
+  - Do not skip or omit test code
+  - Do not delete or weaken tests just to make them pass
   - For complex/large work, user should consider updating Hazelcast Code Samples
 
 ## Code Quality
